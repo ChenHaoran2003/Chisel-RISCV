@@ -1,4 +1,4 @@
-package 04_sw
+package sw
 
 import chisel3._
 

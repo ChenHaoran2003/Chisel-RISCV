@@ -1,4 +1,4 @@
-package 04_sw
+package sw
 
 import chisel3._
 import chisel3.util._
@@ -13,6 +13,8 @@ class ImemPortIo extends Bundle {
 class DmemPortIo extends Bundle {
   val addr = Input(UInt(WORD_LEN.W))
   val rdata = Output(UInt(WORD_LEN.W))
+  val wen = Input(Bool())
+  val wdata = Input(UInt(WORD_LEN.W))
 }
 
 class Memory extends Module {
@@ -23,7 +25,7 @@ class Memory extends Module {
 
   val mem = Mem(16384, UInt(8.W))
 
-  loadMemoryFromFile(mem, "src/hex/lw.hex")
+  loadMemoryFromFile(mem, "src/hex/sw.hex")
 
   io.imem.inst := Cat(
     mem(io.imem.addr + 3.U(WORD_LEN.W)),
@@ -38,4 +40,11 @@ class Memory extends Module {
     mem(io.dmem.addr + 1.U(WORD_LEN.W)),
     mem(io.dmem.addr)
   )
+
+  when(io.dmem.wen) {
+    mem(io.dmem.addr) := io.dmem.wdata(7, 0)
+    mem(io.dmem.addr + 1.U) := io.dmem.wdata(15, 8)
+    mem(io.dmem.addr + 2.U) := io.dmem.wdata(23, 16)
+    mem(io.dmem.addr + 3.U) := io.dmem.wdata(31, 24)
+  }
 }
